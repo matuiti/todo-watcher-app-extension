@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+/* css変数を使って定義 */
+:root {
+  --bg-app: #bfbfbf;
+  --bg-todo: #2d2d2d;
+  --bg-btn-start:#1a96a3;
+  --bg-btn-reset:#6d38d3;
+  --bg-btn-stop:#822727;
+  --bg-btn-stop-go:#0088bf;
+  --bg-btn-done:green;
+  --bg-btn-done-go:#0088bf;
+
+  --text-color: black;
+  --text-color-todo: white;
+
+  --width-app: 680px;
+  --height-app: 100%;
+
+  --letter-spacing: 0.05em;
+}
