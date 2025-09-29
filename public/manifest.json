@@ -2,9 +2,20 @@
   "manifest_version": 3,
   "name": "todo-watcher-app-extension",
   "version": "1.0",
-  "description": "ローカル専用メモ管理拡張",
+  "description": "ローカル専用Todoの作業時間管理アプリ",
   "permissions": ["storage"],
+  "key":"MIIBCgKCAQEApSVYEIOPYnMeD2wmYHdIuq12A68AuBYcBnRrduMiUi1nDykamW5zCrLID2DsHCFn6kQovV69EjpPRsRV9n7CyWnF0b/I5BD+MHxt63xjlAMf9fyZSR9NPtNT2YTrnSLWB3BAkcGkNzmn0y4ZlIRWjRXSvyL3qTjf1v8GRKRxDi4c+Zt4i6Ew7b9YbY3XdpBUBuv6EL4VxHLQxGFSRdbu7hvE4fF7+3h2c+vlMdm/aRUXBFHKzcs/z+Xgr53syM6S20fmj1zhneKI9WKrtLOxqUEmwEiM6a8yzM8+g2ACzV+7OaM0OudG+vB3L37khDWHtdu0kCBa+gTliDo5aa9o0QIDAQAB",
+  "icons": {
+    "16": "icon128.png",
+    "48": "icon128.png",
+    "128": "icon128.png"
+  },
   "action": {
+    "default_icon": {
+      "16": "icon128.png",
+      "48": "icon128.png",
+      "128": "icon128.png"
+    },
     "default_popup": "index.html"
   }
 }
