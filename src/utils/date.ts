@@ -10,11 +10,6 @@ export const getUpdateDate = (dateNow: number): string => {
   return formatter.format(dateNow);
 };
 
-export const setUpdateDate = (): string => {
-  const dateNow = Date.now();
-  return getUpdateDate(dateNow);
-};
-
 export function getRecordMs(startMs: number, endMs: number): RecordTime {
   const diffMs = endMs - startMs;
   const totalSec = Math.floor(diffMs / 1000);
