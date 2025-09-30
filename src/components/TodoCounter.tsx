@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { getUpdateDate } from "../utils/date";
+import { useEffect, useState } from "react";
+import { getUpdateDate, getElapsedMs, formatRecord } from "../utils/date";
 import type { Todo, TodoStatus } from "../utils/types";
 import { checkConfirm } from "../utils/utils";
+import { saveTodos, fetchTodos } from "../utils/storage";
 
 // 状態ラベル
 const statusLabels: Record<TodoStatus, string> = {
   ready: "準備中・・・",
-  working: "作業中",
+  working: "作業カウント中・・・",
   paused: "一時停止中",
   done: "完了",
 };
@@ -17,41 +18,82 @@ const initTodo: Todo = {
   title: "New Task",
   status: "ready",
   isStart: false,
-  isStop: false,
+  isPause: false,
   isDone: false,
+  beforeTime: 0,
+  accumulatedMs: 0,
   record: "",
   date: getUpdateDate(Date.now()),
 };
 
-// --- todo内の各ステータスを返すだけの関数群 ---
+// --- クリックしたボタンに応じてtodoの内容を更新する関数群 ---
 const resetTodo = (todo: Todo): Todo => ({
   ...todo,
   status: "ready",
   isStart: false,
-  isStop: false,
+  isPause: false,
   isDone: false,
+  beforeTime: 0,
+  accumulatedMs: 0,
+  record: "",
 });
 
 const startTodo = (todo: Todo): Todo => ({
   ...todo,
   status: "working",
   isStart: true,
+  beforeTime: Date.now(),
 });
 
-const togglePauseTodo = (todo: Todo): Todo => ({
-  ...todo,
-  isStop: !todo.isStop,
-  status: todo.isStop ? "working" : "paused",
-});
+const pauseTodo = (todo: Todo): Todo => {
+  const endTime = Date.now();
+  const extra = getElapsedMs(todo.beforeTime, endTime);
+  const total = todo.accumulatedMs + extra;
+  const formattedRecord = formatRecord(total);
 
-const toggleDoneTodo = (todo: Todo): Todo => ({
+  return {
+    ...todo,
+    isPause: true,
+    status: "paused",
+    accumulatedMs: total,
+    record: formattedRecord,
+  };
+};
+
+const doneTodo = (todo: Todo): Todo => {
+  const endTime = Date.now();
+  const extra =
+    todo.status === "working" ? getElapsedMs(todo.beforeTime, endTime) : 0;
+  const total = todo.accumulatedMs + extra;
+  const formattedRecord = formatRecord(total);
+
+  return {
+    ...todo,
+    isDone: true,
+    status: "done",
+    accumulatedMs: total,
+    record: formattedRecord,
+  };
+};
+
+const resumeTodo = (todo: Todo): Todo => ({
   ...todo,
-  isDone: !todo.isDone,
-  status: todo.isDone ? "working" : "done",
+  isPause: false,
+  isDone: false,
+  status: "working",
+  beforeTime: Date.now(),
 });
 
 const TodoCounter = () => {
   const [todos, setTodos] = useState<Todo[]>([initTodo]);
+
+  useEffect(() => {
+    fetchTodos(setTodos);
+  }, []);
+
+  useEffect(() => {
+    saveTodos(todos);
+  }, [todos]);
 
   // --- 任意のtodoのステータスを一括更新する関数 ---
   const updateTodoStates = (id: number, updateFn: (todo: Todo) => Todo) => {
@@ -78,19 +120,37 @@ const TodoCounter = () => {
     }
   };
 
-  const handleStop = (id: number) => {
-    updateTodoStates(id, togglePauseTodo);
+  const handlePause = (id: number) => {
+    const todo = todos.find((t) => t.id === id);
+    if (!todo) return;
+
+    if (todo.isPause) {
+      // 一時停止中 → 再開
+      updateTodoStates(id, resumeTodo);
+    } else {
+      // 作業中 → 一時停止
+      updateTodoStates(id, pauseTodo);
+    }
   };
 
   const handleDone = (id: number) => {
-    updateTodoStates(id, toggleDoneTodo);
+    const todo = todos.find((t) => t.id === id);
+    if (!todo) return;
+
+    if (todo.isDone) {
+      // 完了済み → 再開
+      updateTodoStates(id, resumeTodo);
+    } else {
+      // 作業中 → 完了
+      updateTodoStates(id, doneTodo);
+    }
   };
 
   // --- ボタンの無効化判定 ---
-  const isStopButtonDisabled = (todo: Todo) =>
+  const isPauseButtonDisabled = (todo: Todo) =>
     todo.status === "ready" || todo.status === "done";
-
-  const isDoneButtonDisabled = (todo: Todo) => todo.status === "ready";
+  const isDoneButtonDisabled = (todo: Todo) =>
+    todo.status === "ready" || todo.status === "paused";
 
   return (
     <div>
@@ -101,11 +161,17 @@ const TodoCounter = () => {
         >
           <h2>{todo.title}</h2>
           <div>
-            今の状況：
+            ステータス：
             <span className="font-bold italic">
               {statusLabels[todo.status]}
             </span>
           </div>
+          {todo.record && (
+            <div>
+              スコア（経過時間の合計）：
+              <span className="font-semibold">{todo.record}</span>
+            </div>
+          )}
           <div className="flex gap-4">
             {/* スタート／リセット */}
             <button
@@ -127,17 +193,17 @@ const TodoCounter = () => {
               className={`
                 px-2 py-1 rounded transition-all duration-200
                 ${
-                  isStopButtonDisabled(todo)
+                  isPauseButtonDisabled(todo)
                     ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
-                    : todo.isStop
-                    ? "bg-[var(--bg-btn-stop-go)] hover:opacity-80 cursor-pointer"
-                    : "bg-[var(--bg-btn-stop)] hover:opacity-80 cursor-pointer"
+                    : todo.isPause
+                    ? "bg-[var(--bg-btn-pause-go)] hover:opacity-80 cursor-pointer"
+                    : "bg-[var(--bg-btn-pause)] hover:opacity-80 cursor-pointer"
                 }
               `}
-              onClick={() => handleStop(todo.id)}
-              disabled={isStopButtonDisabled(todo)}
+              onClick={() => handlePause(todo.id)}
+              disabled={isPauseButtonDisabled(todo)}
             >
-              {todo.isStop ? "再開する" : "一時停止"}
+              {todo.isPause ? "再開する" : "一時停止"}
             </button>
 
             {/* 完了 */}

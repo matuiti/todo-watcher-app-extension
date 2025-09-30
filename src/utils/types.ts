@@ -5,8 +5,10 @@ export type Todo = {
   title: string;
   status: TodoStatus;
   isStart: boolean;
-  isStop: boolean;
+  isPause: boolean;
   isDone: boolean;
+  beforeTime: number;
+  accumulatedMs: number;
   record: string;
   date: string;
 };
