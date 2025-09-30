@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { setUpdateDate } from "../utils/date";
+import { getUpdateDate } from "../utils/date";
 import type { Todo, TodoStatus } from "../utils/types";
+import { checkConfirm } from "../utils/utils";
 
 // 状態ラベル
 const statusLabels: Record<TodoStatus, string> = {
@@ -19,41 +20,41 @@ const initTodo: Todo = {
   isStop: false,
   isDone: false,
   record: "",
-  date: setUpdateDate(),
+  date: getUpdateDate(Date.now()),
 };
 
-const CounterItem = () => {
+// --- todo内の各ステータスを返すだけの関数群 ---
+const resetTodo = (todo: Todo): Todo => ({
+  ...todo,
+  status: "ready",
+  isStart: false,
+  isStop: false,
+  isDone: false,
+});
+
+const startTodo = (todo: Todo): Todo => ({
+  ...todo,
+  status: "working",
+  isStart: true,
+});
+
+const togglePauseTodo = (todo: Todo): Todo => ({
+  ...todo,
+  isStop: !todo.isStop,
+  status: todo.isStop ? "working" : "paused",
+});
+
+const toggleDoneTodo = (todo: Todo): Todo => ({
+  ...todo,
+  isDone: !todo.isDone,
+  status: todo.isDone ? "working" : "done",
+});
+
+const TodoCounter = () => {
   const [todos, setTodos] = useState<Todo[]>([initTodo]);
 
-  // --- stateを返すだけの関数群 ---
-  const resetTodo = (todo: Todo): Todo => ({
-    ...todo,
-    status: "ready",
-    isStart: false,
-    isStop: false,
-    isDone: false,
-  });
-
-  const startTodo = (todo: Todo): Todo => ({
-    ...todo,
-    status: "working",
-    isStart: true,
-  });
-
-  const togglePauseTodo = (todo: Todo): Todo => ({
-    ...todo,
-    isStop: !todo.isStop,
-    status: todo.isStop ? "working" : "paused",
-  });
-
-  const toggleDoneTodo = (todo: Todo): Todo => ({
-    ...todo,
-    isDone: !todo.isDone,
-    status: todo.isDone ? "working" : "done",
-  });
-
-  // --- state更新をラップするだけの関数 ---
-  const updateTodoById = (id: number, updateFn: (todo: Todo) => Todo) => {
+  // --- 任意のtodoのステータスを一括更新する関数 ---
+  const updateTodoStates = (id: number, updateFn: (todo: Todo) => Todo) => {
     setTodos((prev) =>
       prev.map((todo) => (todo.id === id ? updateFn(todo) : todo))
     );
@@ -66,21 +67,23 @@ const CounterItem = () => {
 
     if (todo.isStart) {
       // すでに開始済み → リセット確認
-      if (window.confirm("タイムをリセットしますか？この操作は戻せません。")) {
-        updateTodoById(id, resetTodo);
+      if (
+        checkConfirm("タイムをリセットしますか？注意：この操作は戻せません。")
+      ) {
+        updateTodoStates(id, resetTodo);
       }
     } else {
       // 未開始 → スタート
-      updateTodoById(id, startTodo);
+      updateTodoStates(id, startTodo);
     }
   };
 
   const handleStop = (id: number) => {
-    updateTodoById(id, togglePauseTodo);
+    updateTodoStates(id, togglePauseTodo);
   };
 
   const handleDone = (id: number) => {
-    updateTodoById(id, toggleDoneTodo);
+    updateTodoStates(id, toggleDoneTodo);
   };
 
   // --- ボタンの無効化判定 ---
@@ -161,4 +164,4 @@ const CounterItem = () => {
   );
 };
 
-export default CounterItem;
+export default TodoCounter;
