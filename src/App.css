@@ -2,7 +2,7 @@
 
 /* css変数を使って定義 */
 :root {
-  --bg-app: #bfbfbf;
+  --bg-app: #494341;
   --bg-todo: #2d2d2d;
   --bg-btn-start: #1a96a3;
   --bg-btn-reset: #6d38d3;
@@ -14,7 +14,9 @@
   --text-color: black;
   --text-color-todo: white;
 
-  --width-app: 680px;
+  --border-color-hr: gray;
+
+  --width-app: 400px;
   --height-app: 100%;
 
   --letter-spacing: 0.05em;
