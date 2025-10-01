@@ -4,6 +4,7 @@
 :root {
   --bg-app: #494341;
   --bg-todo: #2d2d2d;
+  --bg-btn-add: #771c3b;
   --bg-btn-start: #1a96a3;
   --bg-btn-reset: #6d38d3;
   --bg-btn-pause: #822727;
@@ -13,11 +14,16 @@
 
   --text-color: black;
   --text-color-todo: white;
+  --text-color-record: #00cde7;
 
   --border-color-hr: gray;
 
-  --width-app: 400px;
+  --width-app: 480px;
+  --width-btn-add: 4em;
+  --width-btn-counter: 5em;
   --height-app: 100%;
+  --height-btn-add: 2.6em;
 
+  --font-size-global: 0.8rem;
   --letter-spacing: 0.05em;
 }

@@ -6,15 +6,28 @@ import { saveTodos, fetchTodos } from "../utils/storage";
 
 // 状態ラベル
 const statusLabels: Record<TodoStatus, string> = {
-  ready: "準備中・・・",
-  working: "作業カウント中・・・",
+  ready: "準備中...",
+  working: "作業カウント中...",
   paused: "一時停止中",
   done: "完了",
 };
 
 // 初期Todo
-const initTodo: Todo = {
-  id: Date.now(),
+const initTodo1: Todo = {
+  id: 1,
+  title: "New Task",
+  status: "ready",
+  isStart: false,
+  isPause: false,
+  isDone: false,
+  beforeTime: 0,
+  accumulatedMs: 0,
+  showRecord: false,
+  record: "",
+  date: getUpdateDate(Date.now()),
+};
+const initTodo2: Todo = {
+  id: 2,
   title: "New Task",
   status: "ready",
   isStart: false,
@@ -89,12 +102,13 @@ const resumeTodo = (todo: Todo): Todo => ({
 });
 
 const TodoCounter = () => {
-  const [todos, setTodos] = useState<Todo[]>([initTodo]);
+  const [todos, setTodos] = useState<Todo[]>([initTodo1,initTodo2]);
 
   useEffect(() => {
     fetchTodos(setTodos);
   }, []);
 
+  // 保存
   useEffect(() => {
     saveTodos(todos);
   }, [todos]);
@@ -156,45 +170,74 @@ const TodoCounter = () => {
   const isDoneButtonDisabled = (todo: Todo) =>
     todo.status === "ready" || todo.status === "paused";
 
+
+    const handleAddTodo = async () => {
+      const createTodo = (): Todo => ({
+        id: Date.now(),
+        title: "",
+        status: "ready",
+        isStart: false,
+        isPause: false,
+        isDone: false,
+        beforeTime: 0,
+        accumulatedMs: 0,
+        showRecord: false,
+        record: "",
+        date: getUpdateDate(Date.now())
+      });
+      const newTodo = createTodo();
+      setTodos([...todos, newTodo]);
+    };
+  const handleInputTitle = (id: number, value: string) => {
+    setTodos((prev) =>
+      prev.map((todo) => (todo.id === id ? { ...todo, title: value } : todo))
+    );
+  };
   return (
-    <div>
+    <div className="text-[var(--text-color-todo)] flex flex-col gap-3">
+      <div className="text-right">
+        <button className="bg-[var(--bg-btn-add)] min-w-[var(--width-btn-add)] h-[var(--height-btn-add)] px-2 py-1 rounded transition-all duration-200 cursor-pointer"
+        onClick={handleAddTodo}
+        >
+          追加する
+        </button>
+      </div>
       {todos.map((todo) => (
         <div
           key={todo.id}
-          className="flex flex-col bg-[var(--bg-todo)] text-[var(--text-color-todo)] px-4 py-4"
+          className="italic flex flex-col bg-[var(--bg-todo)] px-4 py-4"
         >
-          <h2 className="mb-2.5">{todo.title}</h2>
+          <input
+            maxLength={27}
+            className="text-lg font-bold p-1 cursor-pointer hover:opacity-60 transition duration-200"
+            type="text"
+            placeholder="タイトルを編集する"
+            value={todo.title}
+            onChange={(e) => handleInputTitle(todo.id, e.target.value)}
+          />
           <hr className="border-[var(--border-color-hr)]" />
-          <div className="mt-2.5 mb-2.5">
+          <div className="mt-2.5 mb-2.5 ml-1">
             ステータス：
-            <span className="font-bold italic">
-              {statusLabels[todo.status]}
-            </span>
+            <span className="">{statusLabels[todo.status]}</span>
+            {todo.record && (
+              <span
+                className={`${
+                  todo.showRecord
+                    ? "opacity-100 transition-opacity duration-200 ease pl-1 text-right italic text-[var(--text-color-record)]"
+                    : "opacity-0"
+                }`}
+              >
+                {todo.record}
+              </span>
+            )}
           </div>
           <hr className="border-[var(--border-color-hr)]" />
-          {todo.record && (
-            <div>
-              <div className="mt-2.5 mb-2.5">
-                スコア（経過時間の合計）：
-                <span
-                  className={`${
-                    todo.showRecord
-                      ? "opacity-100 transition-all duration-100 ease font-semibold pl-1"
-                      : "opacity-0"
-                  }`}
-                >
-                  {todo.record}
-                </span>
-              </div>
-              <hr className="border-[var(--border-color-hr)]" />
-            </div>
-          )}
           {/* buttons */}
-          <div className="flex gap-5 mt-5 mb-1">
+          <div className="flex gap-[0.8em] mt-4 mb-1">
             {/* スタート／リセット */}
             <button
               className={`
-                px-2 py-1 rounded transition-all duration-200 cursor-pointer
+                min-w-[var(--width-btn-counter)] px-2 py-1 rounded transition-all duration-200 cursor-pointer
                 ${
                   todo.isStart
                     ? "bg-[var(--bg-btn-reset)] hover:opacity-80"
@@ -209,7 +252,7 @@ const TodoCounter = () => {
             {/* 一時停止 */}
             <button
               className={`
-                px-2 py-1 rounded transition-all duration-200
+                min-w-[var(--width-btn-counter)] px-2 py-1 rounded transition-all duration-200
                 ${
                   isPauseButtonDisabled(todo)
                     ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
@@ -227,7 +270,7 @@ const TodoCounter = () => {
             {/* 完了 */}
             <button
               className={`
-                px-2 py-1 rounded transition-all duration-200
+                min-w-[var(--width-btn-counter)] px-2 py-1 rounded transition-all duration-200
                 ${
                   isDoneButtonDisabled(todo)
                     ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"

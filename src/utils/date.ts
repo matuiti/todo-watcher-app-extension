@@ -20,7 +20,7 @@ export function getConvertTime(elapsedTime: number): RecordTime {
 
 export const formatRecord = (ms: number) => {
   const t = getConvertTime(ms);
-  return `${t.hours}時間${t.minutes}分${t.seconds}秒`;
+  return `  ${t.hours}時間${t.minutes}分${t.seconds}秒`;
 };
 
 export const getElapsedMs = (start: number, end: number): number => {
