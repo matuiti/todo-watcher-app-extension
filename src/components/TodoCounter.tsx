@@ -199,7 +199,7 @@ const TodoCounter = () => {
         <button className="bg-[var(--bg-btn-add)] min-w-[var(--width-btn-add)] h-[var(--height-btn-add)] px-2 py-1 rounded transition-all duration-200 cursor-pointer"
         onClick={handleAddTodo}
         >
-          追加する
+          新規追加
         </button>
       </div>
       {todos.map((todo) => (
