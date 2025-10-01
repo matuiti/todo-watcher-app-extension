@@ -22,6 +22,7 @@ const initTodo: Todo = {
   isDone: false,
   beforeTime: 0,
   accumulatedMs: 0,
+  showRecord: false,
   record: "",
   date: getUpdateDate(Date.now()),
 };
@@ -56,6 +57,7 @@ const pauseTodo = (todo: Todo): Todo => {
     isPause: true,
     status: "paused",
     accumulatedMs: total,
+    showRecord: true,
     record: formattedRecord,
   };
 };
@@ -72,6 +74,7 @@ const doneTodo = (todo: Todo): Todo => {
     isDone: true,
     status: "done",
     accumulatedMs: total,
+    showRecord: true,
     record: formattedRecord,
   };
 };
@@ -82,6 +85,7 @@ const resumeTodo = (todo: Todo): Todo => ({
   isDone: false,
   status: "working",
   beforeTime: Date.now(),
+  showRecord: false,
 });
 
 const TodoCounter = () => {
@@ -157,22 +161,36 @@ const TodoCounter = () => {
       {todos.map((todo) => (
         <div
           key={todo.id}
-          className="flex flex-col gap-2 bg-[var(--bg-todo)] text-[var(--text-color-todo)] px-6 py-4"
+          className="flex flex-col bg-[var(--bg-todo)] text-[var(--text-color-todo)] px-4 py-4"
         >
-          <h2>{todo.title}</h2>
-          <div>
+          <h2 className="mb-2.5">{todo.title}</h2>
+          <hr className="border-[var(--border-color-hr)]" />
+          <div className="mt-2.5 mb-2.5">
             ステータス：
             <span className="font-bold italic">
               {statusLabels[todo.status]}
             </span>
           </div>
+          <hr className="border-[var(--border-color-hr)]" />
           {todo.record && (
             <div>
-              スコア（経過時間の合計）：
-              <span className="font-semibold">{todo.record}</span>
+              <div className="mt-2.5 mb-2.5">
+                スコア（経過時間の合計）：
+                <span
+                  className={`${
+                    todo.showRecord
+                      ? "opacity-100 transition-all duration-100 ease font-semibold pl-1"
+                      : "opacity-0"
+                  }`}
+                >
+                  {todo.record}
+                </span>
+              </div>
+              <hr className="border-[var(--border-color-hr)]" />
             </div>
           )}
-          <div className="flex gap-4">
+          {/* buttons */}
+          <div className="flex gap-5 mt-5 mb-1">
             {/* スタート／リセット */}
             <button
               className={`

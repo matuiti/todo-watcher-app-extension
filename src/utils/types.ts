@@ -9,6 +9,7 @@ export type Todo = {
   isDone: boolean;
   beforeTime: number;
   accumulatedMs: number;
+  showRecord: boolean;
   record: string;
   date: string;
 };
