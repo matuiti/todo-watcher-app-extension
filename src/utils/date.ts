@@ -1,14 +1,14 @@
 import type { RecordTime } from "./types";
 
-const formatter = new Intl.DateTimeFormat("ja-JP", {
-  dateStyle: "full",
-  timeStyle: "short",
-});
+// const formatter = new Intl.DateTimeFormat("ja-JP", {
+//   dateStyle: "full",
+//   timeStyle: "short",
+// });
 
-export const getUpdateDate = (dateNow: number): string => {
-  // 例: "2025/09/29 17:45"
-  return formatter.format(dateNow);
-};
+// 例: "2025/09/29 17:45"
+// export const getUpdateDate = (dateNow: number): string => {
+//   return formatter.format(dateNow);
+// };
 
 export function getConvertTime(elapsedTime: number): RecordTime {
   const totalSec = Math.floor(elapsedTime / 1000);
